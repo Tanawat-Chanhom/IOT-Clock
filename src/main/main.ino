@@ -10,13 +10,13 @@
 #define IN6   D6 
 #define IN7   D7
 
-int counter = 0;
 int val;
 int initStatus;
+int initTime;
 int controller = 32;
 
-int start_hour = 11;
-int start_min = 0;
+int start_hour = 12;
+int start_min = 20;
 
 int counter_stap = 1;
 
@@ -35,7 +35,8 @@ void setup() {
   pinMode(IN6, INPUT);
   pinMode(IN7, INPUT);
   myStepper.setSpeed(12);
-//  initStatus = _init();
+  initStatus = _init();
+  initTime = _initTime();
 }
 
 void loop() {
@@ -45,10 +46,9 @@ void loop() {
   if (val == HIGH) {
     myStepper.step(34);
   } else if (val2 == HIGH) {
-    delay(500);
-    int timeDeff = timeCal(start_hour, start_min);
-    stapToTime(timeDeff);
+    myStepper.step(-34);
   }
+  delay(10);
 }
 
 int timeCal(int hour, int min) {
@@ -58,7 +58,6 @@ int timeCal(int hour, int min) {
 }
 
 void stapToTime(int min) {
-  
   if (min < 0) {
     min = abs(min);
     for(int i=0; i < min; i++){
@@ -95,12 +94,18 @@ void stapToTime(int min) {
 int _init() {
   while(true) {
     val = digitalRead(IN5);
-    Serial.println(val);
-    myStepper.step(-36);
     if (val == LOW) {
-      counter = 0;
       return 1;
+    } else {
+      myStepper.step(10);
     }
-    delay(10);
+    delay(1);
   }
+}
+
+int _initTime() {
+  delay(500);
+  int timeDeff = timeCal(start_hour, start_min);
+  stapToTime(timeDeff);
+  return 1;
 }
