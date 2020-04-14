@@ -9,8 +9,8 @@ long thaiOffset = 21600;
 WiFiUDP myClient;
 NTPClient timeClient(myClient, "time.navy.mi.th", thaiOffset);
 
-const char* ssid = "waroo";
-const char* password = "t11w24j18j31";
+const char* ssid = "Chanhom";
+const char* password = "029959866";
 
 void setup() {
   HTTPClient http;

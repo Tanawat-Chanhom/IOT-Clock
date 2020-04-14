@@ -1,14 +1,22 @@
 #include <Stepper.h>
+#include <NTPClient.h>
+#include <ESP8266WiFi.h>
+#include <ESP8266HTTPClient.h>
+#include <WiFiUdp.h>
 
-#define IN1   D1
-#define IN2   D2
-#define IN3   D3
-#define IN4   D4
+// MT meaning is "MotorSerial"
+#define MS1   D1
+#define MS2   D2
+#define MS3   D3
+#define MS4   D4
 
-#define IN5   D5
+// SS meaning is "Sensor"
+#define SS1   D5
+#define SS2   D6
 
-#define IN6   D6 
-#define IN7   D7
+// IN meaning is "buttom"
+#define IN1   D7 
+#define IN2   D8
 
 int val;
 int initStatus;
@@ -20,28 +28,46 @@ int start_min = 20;
 
 int counter_stap = 1;
 
+long thaiOffset = 21600;
+
+const char* ssid = "Chanhom";
+const char* password = "029959866";
+
 const int stepsPerRevolution = 2048; // change this to fit the number of steps per revolution
 // initialize the stepper library
-Stepper myStepper(stepsPerRevolution, IN4, IN2, IN3, IN1);
+Stepper myStepper(stepsPerRevolution, MS4, MS2, MS3, MS1);
+
+WiFiUDP myClient;
+NTPClient timeClient(myClient, "time.navy.mi.th", thaiOffset);
 
 void setup() {
   Serial.begin(9600);
   
-  pinMode(IN1, OUTPUT);
-  pinMode(IN2, OUTPUT);
-  pinMode(IN3, OUTPUT);
-  pinMode(IN4, OUTPUT);
+  pinMode(MS1, OUTPUT);
+  pinMode(MS2, OUTPUT);
+  pinMode(MS3, OUTPUT);
+  pinMode(MS4, OUTPUT);
   
-  pinMode(IN6, INPUT);
-  pinMode(IN7, INPUT);
+  pinMode(IN1, INPUT);
+  pinMode(IN2, INPUT);
+
+  HTTPClient http;
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.print("Connecting..\n");
+  }
+  Serial.print("Connected!\n");
+  timeClient.begin();
+  
   myStepper.setSpeed(12);
   initStatus = _init();
   initTime = _initTime();
 }
 
 void loop() {
-  byte val = digitalRead(IN6);
-  byte val2 = digitalRead(IN7);
+  byte val = digitalRead(IN1);
+  byte val2 = digitalRead(IN2);
 
   if (val == HIGH) {
     myStepper.step(34);
@@ -52,7 +78,7 @@ void loop() {
 }
 
 int timeCal(int hour, int min) {
-  int hourDeffToMin = (hour - 12) * 60;
+  int hourDeffToMin = (hour+1 - 18) * 60;
   int timeDeff = min + hourDeffToMin;
   return timeDeff;
 }
@@ -64,7 +90,6 @@ void stapToTime(int min) {
       delay(10);
       myStepper.step(-39);
       if (counter_stap == 60) {
-        Serial.println("In");
         delay(500);
         myStepper.step(-22);
         delay(500);
@@ -78,7 +103,6 @@ void stapToTime(int min) {
       delay(10);
       myStepper.step(39);
       if (counter_stap == 60) {
-        Serial.println("In");
         delay(500);
         myStepper.step(22);
         delay(500);
@@ -93,19 +117,30 @@ void stapToTime(int min) {
 
 int _init() {
   while(true) {
-    val = digitalRead(IN5);
-    if (val == LOW) {
+    byte minute = digitalRead(SS1);
+    byte hour = digitalRead(SS2);
+    if (minute == LOW && hour == LOW) {
+      delay(500);
+      Serial.println("Init Done....");
       return 1;
     } else {
       myStepper.step(10);
     }
-    delay(1);
+    delay(10);
   }
 }
 
 int _initTime() {
   delay(500);
-  int timeDeff = timeCal(start_hour, start_min);
+  timeClient.update();
+  
+  Serial.print(timeClient.getHours());
+  Serial.print(":");
+  Serial.print(timeClient.getMinutes());
+  Serial.print(":");
+  Serial.println(timeClient.getSeconds());
+  
+  int timeDeff = timeCal(timeClient.getHours(), timeClient.getMinutes());
   stapToTime(timeDeff);
   return 1;
 }
