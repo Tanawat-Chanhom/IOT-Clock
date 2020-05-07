@@ -5,7 +5,16 @@
 #include <ESP8266WebServer.h>
 #include <WiFiManager.h>         //https://github.com/tzapu/WiFiManager
 
+#include <NTPClient.h>
+#include <ESP8266HTTPClient.h>
+#include <WiFiUdp.h>
+
 #define SW_PIN D7
+
+long thaiOffset = 21600;
+
+WiFiUDP myClient;
+NTPClient timeClient(myClient, "time.navy.mi.th", thaiOffset);
 
 void setup() {
     // put your setup code here, to run once:
@@ -35,8 +44,17 @@ void setup() {
 
     //if you get here you have connected to the WiFi
     Serial.println("connected...yeey :)");
+
+    timeClient.begin();
 }
 
 void loop() {
-    
+  delay(500);
+  timeClient.update();
+  
+  Serial.print(timeClient.getHours());
+  Serial.print(":");
+  Serial.print(timeClient.getMinutes());
+  Serial.print(":");
+  Serial.println(timeClient.getSeconds());
 }

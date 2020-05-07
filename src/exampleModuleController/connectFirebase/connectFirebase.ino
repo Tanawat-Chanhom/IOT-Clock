@@ -7,13 +7,23 @@
 #define FIREBASE_AUTH "mXCGAFDe6mcweyuiJcSWcvO9ViM5sNy2zVvlOwtT"
 
 // Config connect WiFi
-#define WIFI_SSID "waroo"
-#define WIFI_PASSWORD "t11w24j18j31"
+#define WIFI_SSID "Chanhom"
+#define WIFI_PASSWORD "029959866"
+
+// IN meaning is "buttom"
+#define IN1   D7 
+#define IN2   D8
 
 int i = 0;
+const String clockId = "-M3Ri7PNcCDtgyq8tbDz/";
+const String firebasePath = "Clocks/" + clockId;
+int clockBattery = 0;
+int roomTemperature = 32;
 
 void setup() {
   Serial.begin(9600);
+  pinMode(IN1, INPUT);
+  pinMode(IN2, INPUT);
 
   WiFi.mode(WIFI_STA);
   // connect to wifi.
@@ -32,16 +42,17 @@ void setup() {
 }
 
 void loop() {
-  Serial.println(Firebase.getInt("number"));
-//  Firebase.setInt("number", i);
+  if (digitalRead(IN1) == HIGH) {
+    Serial.println(Firebase.getInt(firebasePath+"clockBattery"));
+  }
+
+  if (digitalRead(IN2) == HIGH) {
+      Firebase.setInt(firebasePath+"clockBattery", i);
+      i++;
+  }
   if (Firebase.failed()) {
       Serial.print("Firebase Error");
       Serial.println(Firebase.error());  
       return;
   }
-//  Serial.print("set /number to ");
-//  Serial.println(Firebase.getInt("number"));
-//  
-//  i++;
-//  delay(500);
 }

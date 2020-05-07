@@ -4,10 +4,10 @@
 #include <WiFiUdp.h>
 
 // Decalre ntp client
-long thaiOffset = 21600;
+long thaiOffset = 25200;
 
 WiFiUDP myClient;
-NTPClient timeClient(myClient, "time.navy.mi.th", thaiOffset);
+NTPClient timeClient(myClient, "time2.navy.mi.th", thaiOffset);
 
 const char* ssid = "Chanhom";
 const char* password = "029959866";

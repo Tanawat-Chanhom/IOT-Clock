@@ -4,10 +4,11 @@
 #define IN2   D2   // IN2 is connected to NodeMCU pin D2 (GPIO4)
 #define IN3   D3   // IN3 is connected to NodeMCU pin D3 (GPIO0)
 #define IN4   D4   // IN4 is connected to NodeMCU pin D4 (GPIO2)
-#define IN6   D6   // IN4 is connected to NodeMCU pin D4 (GPIO2)
-#define IN7   D7   // IN4 is connected to NodeMCU pin D4 (GPIO2)
+#define IN6   D7   // IN4 is connected to NodeMCU pin D4 (GPIO2)
+#define IN7   D8   // IN4 is connected to NodeMCU pin D4 (GPIO2)
 
 const int stepsPerRevolution = 2048; // change this to fit the number of steps per revolution
+const int steps = 59;
 
 // initialize the stepper library
 Stepper myStepper(stepsPerRevolution, IN4, IN2, IN3, IN1);
@@ -33,7 +34,7 @@ void loop() {
     myStepper.step(34);
   } else if (val2 == HIGH) {
     delay(500);
-    int timeDeff = timeCal(12, 30);
+    int timeDeff = timeCal(13, 00);
     stapToTime(timeDeff);
     Serial.println(timeDeff);
   }
